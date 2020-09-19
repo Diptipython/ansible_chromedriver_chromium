@@ -1,0 +1,31 @@
+---
+- hosts: remote1
+  tasks:
+
+        - name: update apt
+          become: yes
+          apt:
+             update_cache: yes
+
+        - name: get chromedriver latest version number
+          uri:
+            url: http://chromedriver.storage.googleapis.com/LATEST_RELEASE
+            return_content: yes
+            headers:
+                  Content-Type: "text/plain"
+          register: latest_chromedriver
+
+        - name: download chromedriver
+          become: yes  
+          unarchive:
+                  src: "https://chromedriver.storage.googleapis.com/{{ latest_chromedriver.content|trim }}/chromedriver_linux64.zip"
+                  dest: /usr/local/bin
+                  remote_src: yes
+
+        - name: install chromium
+          become: yes
+          apt: 
+            name: chromium-browser 
+            state: present 
+            update_cache: yes
+
